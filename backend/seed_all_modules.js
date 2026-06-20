@@ -25,12 +25,16 @@ import Driver from './models/Driver.js';
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/bricks_auth';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 const seed = async () => {
+  if (!MONGODB_URI) {
+    console.error('Error: MONGODB_URI environment variable is not defined in .env');
+    process.exit(1);
+  }
   try {
-    await mongoose.connect(MONGO_URI);
-    console.log('Connected to MongoDB for seeding...');
+    await mongoose.connect(MONGODB_URI);
+    console.log('Successfully connected to MongoDB Atlas for seeding...');
 
     // 1. Raw Materials
     await RawMaterial.deleteMany({});

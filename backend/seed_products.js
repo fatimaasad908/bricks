@@ -4,7 +4,7 @@ import Product from './models/Product.js';
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bricks_auth';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 const products = [
   {
@@ -45,15 +45,20 @@ const products = [
   }
 ];
 
-mongoose.connect(MONGO_URI)
+if (!MONGODB_URI) {
+  console.error('Error: MONGODB_URI environment variable is not defined in .env');
+  process.exit(1);
+}
+
+mongoose.connect(MONGODB_URI)
   .then(async () => {
-    console.log('Connected to MongoDB');
+    console.log('Successfully connected to MongoDB Atlas for seeding products...');
     await Product.deleteMany(); // Clear existing
     await Product.insertMany(products);
     console.log('Products seeded successfully');
     process.exit(0);
   })
   .catch((err) => {
-    console.error(err);
+    console.error('MongoDB Atlas connection failed for seed_products script:', err);
     process.exit(1);
   });

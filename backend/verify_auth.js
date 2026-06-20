@@ -12,7 +12,13 @@ async function runTests() {
   console.log('--- Starting Auth Flow Test ---');
 
   // Connect briefly to DB to fetch the generated token directly for the test
-  await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bricks_auth');
+  const MONGODB_URI = process.env.MONGODB_URI;
+  if (!MONGODB_URI) {
+    console.error('Error: MONGODB_URI environment variable is not defined in .env');
+    process.exit(1);
+  }
+  await mongoose.connect(MONGODB_URI);
+  console.log('Successfully connected to MongoDB Atlas for verification tests');
   
   try {
     // 1. Signup

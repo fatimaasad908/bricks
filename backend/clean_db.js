@@ -1,11 +1,27 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 import User from './models/User.js';
 
-mongoose.connect('mongodb://127.0.0.1:27017/bricks_auth').then(async () => {
-  const res = await User.deleteMany({});
-  console.log(`Deleted ${res.deletedCount} users to clean test DB.`);
-  process.exit(0);
-}).catch(e => {
-  console.error(e);
+dotenv.config();
+
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error('Error: MONGODB_URI environment variable is not defined in .env');
   process.exit(1);
-});
+}
+
+mongoose.connect(MONGODB_URI)
+  .then(async () => {
+    console.log("Successfully connected to MongoDB Atlas for clean_db script");
+
+    const res = await User.deleteMany({});
+    console.log(`Deleted ${res.deletedCount} users to clean database.`);
+
+    await mongoose.connection.close();
+    process.exit(0);
+  })
+  .catch((e) => {
+    console.error("MongoDB connection failed for clean_db script:", e);
+    process.exit(1);
+  });

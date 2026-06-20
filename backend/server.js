@@ -48,11 +48,16 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Database Connection
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/bricks_auth';
+const MONGODB_URI = process.env.MONGODB_URI;
 
-mongoose.connect(MONGO_URI)
+if (!MONGODB_URI) {
+  console.error('Error: MONGODB_URI environment variable is not defined in .env');
+  process.exit(1);
+}
+
+mongoose.connect(MONGODB_URI)
   .then(async () => {
-    console.log('Connected to MongoDB');
+    console.log('Successfully connected to MongoDB Atlas');
     
     // Seed default admin if no authorized admin exists
     try {
@@ -88,7 +93,8 @@ mongoose.connect(MONGO_URI)
     });
   })
   .catch((err) => {
-    console.error('Error connecting to MongoDB:', err.message);
+    console.error('MongoDB Atlas connection failed:', err.message);
+    process.exit(1);
   });
 
 // Routes

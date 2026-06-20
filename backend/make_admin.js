@@ -1,8 +1,19 @@
 import mongoose from 'mongoose';
 import User from './models/User.js';
+import dotenv from 'dotenv';
 
-mongoose.connect('mongodb://127.0.0.1:27017/bricks_auth')
+dotenv.config();
+
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error('Error: MONGODB_URI environment variable is not defined in .env');
+  process.exit(1);
+}
+
+mongoose.connect(MONGODB_URI)
   .then(async () => {
+    console.log('Successfully connected to MongoDB Atlas for make_admin script');
     const resAdmin = await User.updateMany({ email: 'asadfatima93@gmail.com' }, { $set: { role: 'admin' } });
     console.log(`Successfully set asadfatima93@gmail.com to Admin role! (Modified: ${resAdmin.modifiedCount})`);
 
@@ -12,6 +23,6 @@ mongoose.connect('mongodb://127.0.0.1:27017/bricks_auth')
     process.exit(0);
   })
   .catch(err => {
-    console.error(err);
+    console.error('MongoDB Atlas connection failed for make_admin script:', err);
     process.exit(1);
   });
