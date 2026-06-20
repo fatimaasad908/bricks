@@ -31,7 +31,8 @@ import {
   BarChart3,
   Trash2,
   Zap,
-  Tag
+  Tag,
+  Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -42,8 +43,23 @@ export default function AdminLayout() {
   const [isNewEntryOpen, setIsNewEntryOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const isDashboard = location.pathname === '/admin/dashboard' || location.pathname === '/admin' || location.pathname === '/admin/';
   const { user, logout } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Close sidebar on mobile screens by default, and update on resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchUnreadCount = async () => {
@@ -74,7 +90,6 @@ export default function AdminLayout() {
     }
   };
 
-
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -88,7 +103,6 @@ export default function AdminLayout() {
     { name: 'Workers', href: '/admin/workers', icon: Users },
     { name: 'Suppliers', href: '/admin/suppliers', icon: Files },
     { name: 'Finance', href: '/admin/finance', icon: DollarSign },
-    { name: 'Sales', href: '/admin/sales', icon: LineChart },
   
     // New modules
     { name: 'Raw Materials', href: '/admin/raw-materials', icon: Boxes },
@@ -118,10 +132,19 @@ export default function AdminLayout() {
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden text-[13px]">
       
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/40 z-20 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+      
       {/* Sidebar - BrickFlow styled */}
       <div 
-        className={`bg-white border-r border-gray-100 transition-all duration-300 flex flex-col z-20 shadow-sm
-        ${isSidebarOpen ? 'w-[240px]' : 'w-[80px]'}`}
+        className={`bg-white border-r border-gray-100 transition-all duration-300 flex flex-col z-30 shadow-sm
+        fixed md:static inset-y-0 left-0
+        ${isSidebarOpen ? 'w-[240px] translate-x-0' : 'w-[80px] -translate-x-full md:translate-x-0 md:w-[80px]'}`}
       >
         <div className="h-16 flex items-center px-6 border-b border-gray-100 shrink-0 gap-3">
           <div className="bg-terracotta-600 rounded-lg p-2 flex items-center justify-center">
@@ -142,6 +165,11 @@ export default function AdminLayout() {
               <Link
                 key={item.name}
                 to={item.href}
+                onClick={() => {
+                  if (window.innerWidth < 768) {
+                    setIsSidebarOpen(false);
+                  }
+                }}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group
                   ${isActive 
                     ? 'bg-terracotta-600 text-white shadow-sm shadow-terracotta-600/20' 
@@ -184,27 +212,19 @@ export default function AdminLayout() {
         {/* Topbar */}
         <header className="h-[72px] bg-white border-b border-gray-100 flex items-center justify-between px-8 shrink-0 relative z-10 shadow-[0_4px_20px_-15px_rgba(0,0,0,0.05)]">
           
-          <div className="flex items-center">
+          <div className="flex items-center gap-3">
+             <button 
+               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+               className="p-2 text-gray-500 hover:text-terracotta-600 rounded-lg hover:bg-gray-50 md:hidden cursor-pointer"
+             >
+               <Menu className="w-5 h-5" />
+             </button>
              <h1 className="text-xl font-bold text-brown-900">
                 {navigation.find(n => location.pathname.startsWith(n.href))?.name || 'Dashboard'}
              </h1>
           </div>
 
           <div className="flex items-center gap-5">
-            {/* Omni-Search */}
-            <div className="relative group w-72">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400 group-focus-within:text-terracotta-500 transition-colors" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search data..."
-                className="block w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-terracotta-500/20 focus:border-terracotta-500 focus:bg-white transition-all"
-              />
-            </div>
-
-            <div className="h-6 w-px bg-gray-200"></div>
-
             <button 
               onClick={handleMarkRead}
               className="relative p-2 text-gray-400 hover:text-terracotta-600 transition-colors bg-gray-50 rounded-lg hover:bg-terracotta-50"
@@ -217,13 +237,15 @@ export default function AdminLayout() {
               )}
             </button>
 
-            <button 
-              onClick={() => setIsNewEntryOpen(true)}
-              className="inline-flex items-center justify-center gap-2 bg-terracotta-600 hover:bg-terracotta-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm shadow-terracotta-600/20"
-            >
-              <Plus className="w-4 h-4" />
-              New Entry
-            </button>
+            {!isDashboard && (
+              <button 
+                onClick={() => setIsNewEntryOpen(true)}
+                className="inline-flex items-center justify-center gap-2 bg-terracotta-600 hover:bg-terracotta-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm shadow-terracotta-600/20"
+              >
+                <Plus className="w-4 h-4" />
+                New Entry
+              </button>
+            )}
           </div>
         </header>
 

@@ -714,15 +714,7 @@ export default function AdminReports() {
         <div className="space-y-8 animate-fadeIn">
           
           {/* Header Action Bar */}
-          <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
-            <input 
-              type="text" 
-              placeholder="Search reports archive..." 
-              value={archiveSearchTerm}
-              onChange={e => setArchiveSearchTerm(e.target.value)}
-              className="text-xs border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-terracotta-500 w-64 text-brown-900 bg-white" 
-            />
-            
+          <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col sm:flex-row justify-end items-center gap-4">
             <button 
               onClick={() => { 
                 setEditingArchiveId(null); 

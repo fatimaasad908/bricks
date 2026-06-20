@@ -148,19 +148,19 @@ export default function Home() {
                 title: 'Awaal',
                 desc: 'Premium quality bricks with high strength, smooth finish, and excellent durability.',
                 tag: 'STANDARD',
-                img: 'src/assets/first.jpg'
+                img: '/src/assets/first.png'
               },
               {
                 title: 'Doem',
                 desc: 'Good quality bricks suitable for general construction at an economical cost.',
-                tag: 'REFRACTORY',
-                img: 'src/assets/second.png'
+                tag: 'NATURAL',
+                img: '/src/assets/second.png'
               },
               {
                 title: 'Soem',
                 desc: 'Basic quality bricks ideal for temporary structures and low-cost projects.',
                 tag: 'NATURAL',
-                img: 'src/assets/third.png'
+                img: '/src/assets/third.png'
               }
             ].map((product, idx) => (
               <motion.div variants={fadeUp} key={idx} className="group cursor-pointer">

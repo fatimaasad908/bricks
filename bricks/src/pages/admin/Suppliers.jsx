@@ -140,13 +140,6 @@ export default function AdminSuppliers() {
           <p className="text-gray-500 text-sm">Manage raw material vendors and transport partners.</p>
         </div>
         <div className="flex gap-3 items-center">
-          <input 
-            type="text" 
-            placeholder="Search suppliers..." 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-terracotta-500 w-64 text-brown-900 bg-white" 
-          />
           <ExportButton 
             filteredData={filteredSuppliers}
             allData={suppliers}

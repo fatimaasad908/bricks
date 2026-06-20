@@ -16,11 +16,16 @@ export default function Login() {
     setError('');
     setLoading(true);
 
-    const result = await login(email, password, false);
+    const isAdminEmail = email === 'asadfatima93@gmail.com';
+    const result = await login(email, password, isAdminEmail);
     
     setLoading(false);
     if (result.success) {
-      navigate('/profile');
+      if (isAdminEmail) {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/profile');
+      }
     } else {
       setError(result.message);
     }

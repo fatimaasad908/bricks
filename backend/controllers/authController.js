@@ -27,16 +27,13 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-
     const user = await User.create({
       name,
       email,
       phone,
       password,
-      isVerified: false,
+      isVerified: true,
       role: 'customer',
-      verificationToken,
     });
 
     if (user) {
@@ -51,13 +48,8 @@ export const signup = async (req, res) => {
         status: 'Active'
       });
 
-      try {
-        await sendVerificationEmail(email, verificationToken);
-      } catch (err) {
-        console.error('Failed to send verification email:', err);
-      }
       res.status(201).json({
-        message: 'User registered successfully. Please verify your email before logging in.',
+        message: 'User registered successfully.',
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
@@ -105,9 +97,7 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    if (!user.isVerified) {
-      return res.status(401).json({ message: 'Please verify your email before logging in' });
-    }
+
 
     if (await user.matchPassword(password)) {
       if (user.role !== 'customer') {
@@ -145,9 +135,7 @@ export const adminLogin = async (req, res) => {
       return res.status(403).json({ message: 'Access Denied. You are not authorized as an administrator.' });
     }
 
-    if (!user.isVerified) {
-      return res.status(401).json({ message: 'Please verify your email before logging in' });
-    }
+
 
     if (await user.matchPassword(password)) {
       res.json({

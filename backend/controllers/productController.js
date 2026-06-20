@@ -75,7 +75,7 @@ export const uploadProductImage = async (req, res) => {
     if (ext === 'jpeg') ext = 'jpg';
     
     const filename = `product_${Date.now()}.${ext}`;
-    const uploadDir = path.join(process.cwd(), 'uploads');
+    const uploadDir = path.join(process.cwd(), 'src', 'assets');
     
     // Ensure upload directory exists
     if (!fs.existsSync(uploadDir)) {
@@ -85,7 +85,7 @@ export const uploadProductImage = async (req, res) => {
     const filePath = path.join(uploadDir, filename);
     fs.writeFileSync(filePath, buffer);
 
-    const imageUrl = `/uploads/${filename}`;
+    const imageUrl = `/src/assets/${filename}`;
     res.json({ imageUrl });
   } catch (error) {
     res.status(500).json({ message: error.message });

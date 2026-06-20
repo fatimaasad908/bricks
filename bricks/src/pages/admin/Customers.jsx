@@ -304,14 +304,6 @@ export default function AdminCustomers() {
               <option value="Inactive">Inactive</option>
               <option value="Suspended">Suspended</option>
             </select>
-            
-            <input 
-              type="text" 
-              placeholder="Search by name, contact, email..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-terracotta-500 w-64 text-brown-900 bg-white" 
-            />
           </div>
         </div>
 

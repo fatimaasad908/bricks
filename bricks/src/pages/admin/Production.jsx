@@ -111,6 +111,39 @@ export default function AdminProduction() {
       default: return 'bg-gray-100 text-gray-700';
     }
   };
+
+  const latestProduction = productions.length > 0 ? productions[0] : null;
+
+  const getStepIndex = (status) => {
+    const mapping = {
+      'MIXING': 1,
+      'SHAPING': 2,
+      'DRYING': 3,
+      'FIRING': 4,
+      'QC INSPECTION': 5,
+      'READY': 6,
+      'COMPLETED': 6
+    };
+    return mapping[status] || 1;
+  };
+
+  const latestStep = latestProduction ? getStepIndex(latestProduction.status) : 1;
+  const progressPercent = latestProduction ? ((latestStep - 1) / 5) * 100 : 0;
+  const progressWidth = `${progressPercent}%`;
+
+  const totalRawMaterial = productions.reduce((sum, p) => sum + (Number(p.rawMaterial) || 0), 0);
+  const totalBricksShaped = productions.reduce((sum, p) => sum + (Number(p.bricksShaped) || 0), 0);
+  const avgEfficiency = totalRawMaterial > 0 ? Math.round(totalBricksShaped / totalRawMaterial) : 0;
+
+  const efficiencyChartData = productions.length > 0
+    ? [...productions].reverse().map(p => ({
+        value: p.rawMaterial > 0 ? Math.round(p.bricksShaped / p.rawMaterial) : 0,
+        date: p.date
+      }))
+    : [{ value: 0 }];
+
+  const steps = ['MIXING', 'SHAPING', 'DRYING', 'FIRING', 'QC INSPECTION', 'READY'];
+
   return (
     <div className="space-y-6">
       
@@ -138,56 +171,41 @@ export default function AdminProduction() {
         {/* Batch Tracker */}
         <div className="lg:col-span-3 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
           <div className="flex justify-between items-center mb-8">
-            <h3 className="text-sm font-bold text-gray-500 tracking-widest uppercase">Current Batch Tracker: #B204</h3>
+            <h3 className="text-sm font-bold text-gray-500 tracking-widest uppercase">
+              Current Batch Tracker: {latestProduction ? latestProduction.batchId : 'No Batch Active'}
+            </h3>
           </div>
           
           <div className="relative flex justify-between items-center w-full px-4 text-[10px] font-bold text-gray-400 tracking-wider">
             {/* Connecting Lines */}
-            <div className="absolute top-4 left-8 right-8 h-0.5 bg-gray-100 -z-10"></div>
-            <div className="absolute top-4 left-8 w-[60%] h-0.5 bg-terracotta-600 -z-10"></div>
+            <div className="absolute top-4 left-8 right-8 h-0.5 bg-gray-100 -z-10">
+              <div className="h-full bg-terracotta-600 transition-all duration-500" style={{ width: progressWidth }}></div>
+            </div>
 
             {/* Steps */}
-            <div className="flex flex-col gap-3 items-center">
-              <div className="w-8 h-8 rounded-full bg-terracotta-600 text-white flex items-center justify-center border-4 border-white shadow-sm ring-2 ring-terracotta-100">
-                <Check className="w-4 h-4" />
-              </div>
-              <span className="text-brown-900">MIXING</span>
-            </div>
-            
-            <div className="flex flex-col gap-3 items-center">
-              <div className="w-8 h-8 rounded-full bg-terracotta-600 text-white flex items-center justify-center border-4 border-white shadow-sm ring-2 ring-terracotta-100">
-                <Check className="w-4 h-4" />
-              </div>
-              <span className="text-brown-900">SHAPING</span>
-            </div>
-            
-            <div className="flex flex-col gap-3 items-center">
-              <div className="w-8 h-8 rounded-full bg-terracotta-600 text-white flex items-center justify-center border-4 border-white shadow-sm ring-2 ring-terracotta-100">
-                <Check className="w-4 h-4" />
-              </div>
-              <span className="text-brown-900">DRYING</span>
-            </div>
-            
-            <div className="flex flex-col gap-3 items-center">
-              <div className="w-8 h-8 rounded-full bg-terracotta-600 text-white flex items-center justify-center border-4 border-white shadow-sm ring-2 ring-terracotta-100">
-                <Check className="w-4 h-4" />
-              </div>
-              <span className="text-brown-900">FIRING</span>
-            </div>
-            
-            <div className="flex flex-col gap-3 items-center">
-              <div className="w-8 h-8 rounded-full bg-white text-terracotta-600 flex items-center justify-center border-2 border-terracotta-600 shadow-sm ring-4 ring-terracotta-50">
-                <MoreHorizontal className="w-4 h-4" />
-              </div>
-              <span className="text-terracotta-600">QC INSPECTION</span>
-            </div>
-            
-            <div className="flex flex-col gap-3 items-center">
-              <div className="w-8 h-8 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center border-2 border-gray-200 shadow-sm">
-                <Check className="w-4 h-4 opacity-50" />
-              </div>
-              <span>READY</span>
-            </div>
+            {steps.map((stepName, idx) => {
+              const stepNum = idx + 1;
+              const isCompleted = stepNum < latestStep;
+              const isActive = stepNum === latestStep;
+              return (
+                <div key={stepName} className="flex flex-col gap-3 items-center">
+                  {isCompleted ? (
+                    <div className="w-8 h-8 rounded-full bg-terracotta-600 text-white flex items-center justify-center border-4 border-white shadow-sm ring-2 ring-terracotta-100">
+                      <Check className="w-4 h-4" />
+                    </div>
+                  ) : isActive ? (
+                    <div className="w-8 h-8 rounded-full bg-white text-terracotta-600 flex items-center justify-center border-2 border-terracotta-600 shadow-sm ring-4 ring-terracotta-50">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center border-2 border-gray-200 shadow-sm">
+                      <Check className="w-4 h-4 opacity-50" />
+                    </div>
+                  )}
+                  <span className={isActive ? "text-terracotta-600" : isCompleted ? "text-brown-900" : ""}>{stepName}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -195,15 +213,14 @@ export default function AdminProduction() {
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
           <div className="flex justify-between items-start mb-2">
             <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-2">Efficiency Rate</h3>
-            <span className="text-green-600 text-xs font-bold">+2.4%</span>
           </div>
           <div className="flex items-baseline gap-2 mb-4">
-            <h2 className="text-3xl font-black text-brown-900">842</h2>
+            <h2 className="text-3xl font-black text-brown-900">{avgEfficiency}</h2>
             <span className="text-gray-500 font-medium text-sm">bricks/ton</span>
           </div>
           <div className="h-16 w-full mt-2">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={efficiencyData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+              <AreaChart data={efficiencyChartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                 <defs>
                    <linearGradient id="colorEff" x1="0" y1="0" x2="0" y2="1">
                      <stop offset="5%" stopColor="#e25822" stopOpacity={0.2}/>

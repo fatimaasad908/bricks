@@ -4,14 +4,16 @@ import { apiFetch } from '../../utils/api';
 import ExportButton from '../../components/ExportButton';
 const getProductImage = (imagePath, productName = '') => {
   if (!imagePath) return 'https://placehold.co/100x100?text=Brick';
-  if (imagePath === "first" || imagePath.includes("first") || imagePath.includes("red_brick") || productName.toLowerCase().includes("red")) {
-    return "/images/first.png";
+  const pathLower = imagePath.toLowerCase();
+  const nameLower = productName.toLowerCase();
+  if (pathLower === "first" || pathLower.includes("first") || pathLower.includes("red") || nameLower.includes("red") || nameLower.includes("awaal")) {
+    return "/images/red_brick.png";
   }
-  if (imagePath === "second" || imagePath.includes("second") || imagePath.includes("fire_brick") || productName.toLowerCase().includes("fire")) {
-    return "/images/second.png";
+  if (pathLower === "second" || pathLower.includes("second") || pathLower.includes("fire") || nameLower.includes("fire") || nameLower.includes("doem")) {
+    return "/images/fire_brick.png";
   }
-  if (imagePath === "third" || imagePath.includes("third") || imagePath.includes("clay_brick") || productName.toLowerCase().includes("clay")) {
-    return "/images/third.png";
+  if (pathLower === "third" || pathLower.includes("third") || pathLower.includes("clay") || nameLower.includes("clay") || nameLower.includes("soem")) {
+    return "/images/clay_brick.png";
   }
   if (imagePath.startsWith('/uploads')) {
     return `http://localhost:5000${imagePath}`;
@@ -204,13 +206,6 @@ export default function AdminProducts() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
           <h3 className="text-sm font-bold text-gray-400 tracking-wider uppercase">Active Products List</h3>
-          <input 
-            type="text" 
-            placeholder="Search brick catalog..." 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-terracotta-500 w-64 text-brown-900" 
-          />
         </div>
         <div className="overflow-x-auto">
           {loading ? (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Truck, User, Plus, Edit, Trash2, X, Phone, Shield, Search } from 'lucide-react';
+import { Truck, User, Plus, Edit, Trash2, X, Phone, Shield } from 'lucide-react';
 import { apiFetch } from '../../utils/api';
 
 export default function AdminTransport() {
@@ -155,7 +155,6 @@ export default function AdminTransport() {
         </button>
       </div>
 
-      {/* Tabs & Search */}
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm">
         <div className="flex p-1 bg-gray-50 rounded-xl">
           <button
@@ -172,17 +171,6 @@ export default function AdminTransport() {
             <User className="w-4 h-4" />
             Driver Registry ({drivers.length})
           </button>
-        </div>
-        
-        <div className="relative">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder={`Search ${activeTab}...`}
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-terracotta-500/20 focus:border-terracotta-500 w-64 text-brown-900 bg-white"
-          />
         </div>
       </div>
 

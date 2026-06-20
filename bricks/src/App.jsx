@@ -14,7 +14,6 @@ import ContactUs from './pages/ContactUs';
 import OrderOnline from './pages/OrderOnline';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import VerifyEmail from './pages/VerifyEmail';
 import Profile from './pages/Profile';
 
 /* Admin Pages */
@@ -26,7 +25,6 @@ import AdminProduction from './pages/admin/Production';
 import AdminSuppliers from './pages/admin/Suppliers';
 import AdminTransport from './pages/admin/Transport';
 import AdminFinance from './pages/admin/Finance';
-import AdminSales from './pages/admin/Sales';
 import AdminOrders from './pages/admin/Orders';
 import AdminReports from './pages/admin/Reports';
 import AdminSettings from './pages/admin/Settings';
@@ -69,7 +67,6 @@ function App() {
           {/* Auth / Individual Entry */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/verify/:token" element={<VerifyEmail />} />
           <Route path="/admin/login" element={<AdminLogin />} />
 
           {/* Protected Customer Routes */}
@@ -89,7 +86,6 @@ function App() {
               <Route path="suppliers" element={<AdminSuppliers />} />
               <Route path="transport" element={<AdminTransport />} />
               <Route path="finance" element={<AdminFinance />} />
-              <Route path="sales" element={<AdminSales />} />
               <Route path="orders" element={<AdminOrders />} />
               <Route path="reports" element={<AdminReports />} />
               <Route path="settings" element={<AdminSettings />} />

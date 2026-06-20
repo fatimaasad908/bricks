@@ -8,34 +8,40 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bricks_aut
 
 const products = [
   {
-    productId: 'P-004',
-    name: 'Awaal',
+    productId: 'P-001',
+    name: 'Awaal (First Class)',
     tag: 'STANDARD',
-    price: '3000 / 100 unit',
+    price: '16000 / 1000 unit',
     iconName: 'Box',
-    image: '/images/red_brick.png',
-    desc: 'Awaal description.',
-    specs: {}
+    image: '/src/assets/first.png',
+    desc: 'Premium quality bricks with high strength, smooth finish, and excellent durability.',
+    specs: {
+      dimensions: '9" x 4.5" x 3"', weight: '3.2 kg'
+    }
   },
   {
-    productId: 'P-005',
-    name: 'Doem',
-    tag: 'REFRACTORY',
-    price: '4500 / 100 unit',
-    iconName: 'Flame',
-    image: '/images/fire_brick.png',
-    desc: 'Doem description.',
-    specs: {}
-  },
-  {
-    productId: 'P-006',
-    name: 'Soem',
+    productId: 'P-002',
+    name: 'Doem (Second Class)',
     tag: 'NATURAL',
-    price: '5000 / 100 unit',
-    iconName: 'Layers',
-    image: '/images/clay_brick.png',
-    desc: 'Soem description.',
-    specs: {}
+    price: '13000 / 1000 unit',
+    iconName: 'Box',
+    image: '/src/assets/second.png',
+    desc: 'Good quality bricks suitable for general construction at an economical cost.',
+    specs: {
+      dimensions: '9" x 4.5" x 3"', weight: '3.0 kg'
+    }
+  },
+  {
+    productId: 'P-003',
+    name: 'Soem (Third Class)',
+    tag: 'NATURAL',
+    price: '10000 / 1000 unit',
+    iconName: 'Box',
+    image: '/src/assets/third.png',
+    desc: 'Basic quality bricks ideal for temporary structures and low-cost projects.',
+    specs: {
+      dimensions: '9" x 4.5" x 3"', weight: '2.8 kg'
+    }
   }
 ];
 

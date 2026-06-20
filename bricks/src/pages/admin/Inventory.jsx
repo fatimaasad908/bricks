@@ -151,13 +151,6 @@ export default function AdminInventory() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
           <h3 className="text-sm font-bold text-gray-400 tracking-wider uppercase">Active Inventory Ledger</h3>
-          <input 
-            type="text" 
-            placeholder="Search stock..." 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-terracotta-500 w-64 text-brown-900" 
-          />
         </div>
         <div className="overflow-x-auto">
           {loading ? (

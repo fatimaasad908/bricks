@@ -10,7 +10,6 @@ import orderRoutes from './routes/orderRoutes.js';
 import supplierRoutes from './routes/supplierRoutes.js';
 import productionRoutes from './routes/productionRoutes.js';
 import financeRoutes from './routes/financeRoutes.js';
-import saleRoutes from './routes/saleRoutes.js';
 import transportRoutes from './routes/transportRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 
@@ -32,9 +31,7 @@ import shiftRoutes from './routes/shiftRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import wastageRoutes from './routes/wastageRoutes.js';
 import energyConsumptionRoutes from './routes/energyConsumptionRoutes.js';
-import priceListRoutes from './routes/priceListRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
-
 import { protect, admin } from './middleware/authMiddleware.js';
 import path from 'path';
 import User from './models/User.js';
@@ -103,7 +100,6 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/suppliers', protect, admin, supplierRoutes);
 app.use('/api/production', protect, admin, productionRoutes);
 app.use('/api/finance', protect, admin, financeRoutes);
-app.use('/api/sales', protect, admin, saleRoutes);
 app.use('/api/transport', transportRoutes);
 app.use('/api/dashboard', protect, admin, dashboardRoutes);
 
@@ -125,8 +121,7 @@ app.use('/api/shift-management', protect, admin, shiftRoutes);
 app.use('/api/reports', protect, admin, reportRoutes);
 app.use('/api/wastage', protect, admin, wastageRoutes);
 app.use('/api/energy-consumption', protect, admin, energyConsumptionRoutes);
-app.use('/api/price-list', protect, admin, priceListRoutes);
-app.use('/api/notifications', protect, notificationRoutes);
+app.use('/api/notifications', protect, admin, notificationRoutes);
 
 // Base route for testing
 app.get('/', (req, res) => {

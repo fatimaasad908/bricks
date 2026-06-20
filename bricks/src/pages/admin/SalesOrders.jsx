@@ -19,6 +19,17 @@ export default function AdminSalesOrders() {
     orderDate: ''
   });
 
+  const getOrderTotal = (item) => {
+    if (!item) return 0;
+    const amount = Number(item.totalAmount);
+    if (isNaN(amount)) {
+      const qty = Number(item.quantity) || 0;
+      const price = Number(item.unitPrice) || (item.products && item.products[0] && Number(item.products[0].unitPrice)) || 0;
+      return qty * price;
+    }
+    return amount;
+  };
+
   const fetchItems = async () => {
     try {
       const data = await apiFetch('/sales-orders');
@@ -36,8 +47,8 @@ export default function AdminSalesOrders() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const qtyVal = Number(formData.quantity);
-    const priceVal = Number(formData.unitPrice);
+    const qtyVal = Number(formData.quantity) || 0;
+    const priceVal = Number(formData.unitPrice) || 0;
     const amountVal = qtyVal * priceVal;
 
     const payload = {
@@ -121,9 +132,6 @@ export default function AdminSalesOrders() {
           <p className="text-gray-500 text-sm">Create customer sales orders, track delivery dispatches, and check payment status</p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 bg-white border border-gray-200 text-brown-900 px-4 py-2 rounded-lg text-sm font-semibold hover:border-terracotta-500 transition-colors shadow-sm">
-            <Download className="w-4 h-4" /> Export List
-          </button>
           <button onClick={() => { setEditingId(null); setFormData({ orderNumber: 'SO-' + Date.now().toString().slice(-4), customer: '', productName: 'Standard Clay Brick', quantity: '', unitPrice: 20, paymentStatus: 'Unpaid', deliveryStatus: 'Pending', orderDate: new Date().toISOString().split('T')[0] }); setShowModal(true); }} className="flex items-center gap-2 bg-terracotta-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-terracotta-700 transition-colors shadow-sm shadow-terracotta-600/20">
             <ClipboardList className="w-4 h-4" /> Book New Order
           </button>
@@ -159,7 +167,7 @@ export default function AdminSalesOrders() {
           <div>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Sales Revenue</p>
             <h3 className="text-2xl font-bold text-brown-900 font-mono">
-              ₨ {items.reduce((sum, item) => sum + (Number(item.totalAmount) || 0), 0).toLocaleString()}
+              ₨ {items.reduce((sum, item) => sum + getOrderTotal(item), 0).toLocaleString()}
             </h3>
           </div>
         </div>
@@ -169,13 +177,6 @@ export default function AdminSalesOrders() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
           <h3 className="text-sm font-bold text-gray-400 tracking-wider uppercase">Sales ledger</h3>
-          <input 
-            type="text" 
-            placeholder="Search orders..." 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-terracotta-500 w-64 text-brown-900" 
-          />
         </div>
         <div className="overflow-x-auto">
           {loading ? (
@@ -214,10 +215,10 @@ export default function AdminSalesOrders() {
                       {(item.products && item.products[0]?.productName) || 'Standard Clay Brick'}
                     </td>
                     <td className="px-6 py-5 font-bold text-brown-900">
-                      {item.quantity.toLocaleString()} Units
+                      {(Number(item.quantity) || 0).toLocaleString()} Units
                     </td>
                     <td className="px-6 py-5 font-bold text-brown-900">
-                      ₨ {Number(item.totalAmount).toLocaleString()}
+                      ₨ {getOrderTotal(item).toLocaleString()}
                     </td>
                     <td className="px-6 py-5">
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold

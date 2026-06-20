@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 // Import all models
 import RawMaterial from './models/RawMaterial.js';
 import Customer from './models/Customer.js';
-import SalesOrder from './models/SalesOrder.js';
+import OrderQuote from './models/OrderQuote.js';
 import ProductionBatch from './models/ProductionBatch.js';
 import Employee from './models/Employee.js';
 import Equipment from './models/Equipment.js';
@@ -19,7 +19,6 @@ import Shift from './models/Shift.js';
 import Report from './models/Report.js';
 import Wastage from './models/Wastage.js';
 import EnergyConsumption from './models/EnergyConsumption.js';
-import PriceList from './models/PriceList.js';
 import Product from './models/Product.js';
 import Truck from './models/Truck.js';
 import Driver from './models/Driver.js';
@@ -51,13 +50,47 @@ const seed = async () => {
     ]);
     console.log('Seeded Customers');
 
-    // 3. Sales Orders
-    await SalesOrder.deleteMany({});
-    await SalesOrder.create([
-      { orderNumber: 'SO-1001', customer: 'Kashif Contractors', products: [{ productName: 'Standard Clay Brick', quantity: 15000, unitPrice: 20 }], quantity: 15000, totalAmount: 300000, paymentStatus: 'Partial', deliveryStatus: 'Pending' },
-      { orderNumber: 'SO-1002', customer: 'Lahore Construction Group', products: [{ productName: 'Fly Ash Brick', quantity: 20000, unitPrice: 25 }], quantity: 20000, totalAmount: 500000, paymentStatus: 'Paid', deliveryStatus: 'Delivered' }
+    // 3. Sales Orders (saved as OrderQuotes)
+    await OrderQuote.deleteMany({});
+    await OrderQuote.create([
+      {
+        orderNumber: 'SO-1001',
+        customer: 'Kashif Contractors',
+        products: [{ productName: 'Standard Clay Brick', quantity: 15000, unitPrice: 20 }],
+        quantity: 15000,
+        totalAmount: 300000,
+        paymentStatus: 'Partial',
+        deliveryStatus: 'Pending',
+        companyName: 'Sales Order',
+        contactPerson: 'Kashif Contractors',
+        email: 'kashif@contractors.com',
+        phone: '+92 300 1234567',
+        product: 'Standard Clay Brick',
+        quantity: '15000',
+        totalPrice: 300000,
+        status: 'Pending',
+        isRead: true
+      },
+      {
+        orderNumber: 'SO-1002',
+        customer: 'Lahore Construction Group',
+        products: [{ productName: 'Fly Ash Brick', quantity: 20000, unitPrice: 25 }],
+        quantity: 20000,
+        totalAmount: 500000,
+        paymentStatus: 'Paid',
+        deliveryStatus: 'Delivered',
+        companyName: 'Sales Order',
+        contactPerson: 'Lahore Construction Group',
+        email: 'info@lahoreconst.com',
+        phone: '+92 321 9876543',
+        product: 'Fly Ash Brick',
+        quantity: '20000',
+        totalPrice: 500000,
+        status: 'Delivered',
+        isRead: true
+      }
     ]);
-    console.log('Seeded Sales Orders');
+    console.log('Seeded Sales Orders (OrderQuotes)');
 
     // 4. Production Batches
     await ProductionBatch.deleteMany({});
@@ -178,10 +211,11 @@ const seed = async () => {
     // 19. Extended Products Catalog
     await Product.deleteMany({});
     await Product.create([
-      { productId: 'BRK-001', name: 'Standard Clay Brick', tag: 'Premium', price: '₨ 25 / Unit', iconName: 'Box', image: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?q=80&w=400&auto=format&fit=crop', desc: 'Durable, hand-formed standard red clay bricks suited for outer facing load-bearing structures.', specs: { dimensions: '9" x 4.5" x 3"', weight: '3.2 kg', compressiveStrength: '30 MPa', waterAbsorption: '8%' }, sku: 'SKU-CLY-01', dimensions: '9" x 4.5" x 3"', weight: '3.2 kg', color: 'Terracotta Red', category: 'Clay Bricks', unitPrice: 25, wholesalePrice: 20, stockStatus: 'In Stock' },
-      { productId: 'BRK-002', name: 'Fly Ash Brick', tag: 'Eco Friendly', price: '₨ 30 / Unit', iconName: 'Activity', image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=400&auto=format&fit=crop', desc: 'Environmentally sustainable fly ash brick with extreme uniform sizing and dimensional stability.', specs: { dimensions: '9" x 4" x 3"', weight: '2.8 kg', compressiveStrength: '25 MPa', waterAbsorption: '12%' }, sku: 'SKU-ASH-02', dimensions: '9" x 4" x 3"', weight: '2.8 kg', color: 'Cement Gray', category: 'Fly Ash Bricks', unitPrice: 30, wholesalePrice: 24, stockStatus: 'In Stock' }
+      { productId: 'BRK-001', name: 'Awaal(First Class)', tag: 'Premium', price: '₨ 16 / Unit', iconName: 'Box', image: '/src/assets/first.png', desc: 'Premium quality bricks with high strength, smooth finish, and excellent durability.', specs: { dimensions: '9" x 4.5" x 3"', weight: '3.2 kg' }, sku: 'SKU-CLY-01', dimensions: '9" x 4.5" x 3"', weight: '3.2 kg', color: 'Terracotta Red', category: 'Clay Bricks', unitPrice: 16, wholesalePrice: 16, stockStatus: 'In Stock' },
+      { productId: 'BRK-002', name: 'Doem (Second Class)', tag: 'Premium', price: '₨ 13 / Unit', iconName: 'Box', image: '/src/assets/second.png', desc: 'Good quality bricks suitable for general construction at an economical cost.', specs: { dimensions: '9" x 4.5" x 3"', weight: '3.0 kg' }, sku: 'SKU-CLY-01', dimensions: '9" x 4.5" x 3"', weight: '3.2 kg', color: 'Terracotta Red', category: 'Clay Bricks', unitPrice: 13, wholesalePrice: 13, stockStatus: 'In Stock' },
+      { productId: 'BRK-003', name: 'Soem(Third Class)', tag: 'Premium', price: '₨ 10 / Unit', iconName: 'Box', image: '/src/assets/third.png', desc: 'Basic quality bricks ideal for temporary structures and low-cost projects.', specs: { dimensions: '9" x 4" x 3"', weight: '2.8 kg' }, sku: 'SKU-CLY-01', dimensions: '9" x 4.5" x 3"', weight: '3.2 kg', color: 'Terracotta Red', category: 'Clay Bricks', unitPrice: 10, wholesalePrice: 10, stockStatus: 'In Stock' }
     ]);
-    console.log('Seeded Extended Products Catalog');
+    console.log('Seeded Products');
 
     // 20. Trucks
     await Truck.deleteMany({});

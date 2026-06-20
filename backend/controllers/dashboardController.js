@@ -3,7 +3,9 @@ import Customer from '../models/Customer.js';
 import Product from '../models/Product.js';
 import OrderQuote from '../models/OrderQuote.js';
 import Inventory from '../models/Inventory.js';
-import Sale from '../models/Sale.js';
+import ProductionBatch from '../models/ProductionBatch.js';
+import Finance from '../models/Finance.js';
+import RawMaterial from '../models/RawMaterial.js';
 
 export const getDashboardStats = async (req, res) => {
   try {
@@ -20,97 +22,129 @@ export const getDashboardStats = async (req, res) => {
     const readyForDelivery = await OrderQuote.countDocuments({ status: 'Ready for Delivery' });
     const deliveredOrders = await OrderQuote.countDocuments({ status: 'Delivered' });
 
-    // Revenue
-    const deliveredQuotes = await OrderQuote.find({ status: 'Delivered' });
-    const orderRevenue = deliveredQuotes.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+    // Finance Totals from Finance Collection
+    const incomes = await Finance.aggregate([
+      { $match: { type: 'Income' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    const expenses = await Finance.aggregate([
+      { $match: { type: 'Expense' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    const totalIncome = incomes[0]?.total || 0;
+    const totalExpenses = expenses[0]?.total || 0;
+    const netBalance = totalIncome - totalExpenses;
 
-    const sales = await Sale.find();
-    const salesRevenue = sales.reduce((sum, s) => sum + (s.amount || 0), 0);
-    const revenue = orderRevenue || salesRevenue || 1250000; // fallback default for display if empty
+    // Production statistics: Bricks produced (sum of Completed quantityProduced in ProductionBatch)
+    const productionStats = await ProductionBatch.aggregate([
+      { $match: { completionStatus: 'Completed' } },
+      { $group: { _id: null, total: { $sum: '$quantityProduced' } } }
+    ]);
+    const inventoryStockLevels = productionStats[0]?.total || 0;
 
-    // Inventory levels
-    const inventoryItems = await Inventory.find();
-    const inventoryStockLevels = inventoryItems.reduce((sum, item) => sum + (item.availableStock || 0), 0);
-
-    // 1. Monthly Sales Chart Data
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const salesByMonth = {};
-    
-    // Group delivered orders
-    deliveredQuotes.forEach(order => {
-      const m = new Date(order.createdAt).toLocaleString('default', { month: 'short' });
-      salesByMonth[m] = (salesByMonth[m] || 0) + (order.totalPrice || 0);
+    // Raw Material Stock Alert Capacity
+    const rawMaterials = await RawMaterial.find();
+    let totalStock = 0;
+    let totalReorder = 0;
+    let hasLowStockAlert = false;
+    rawMaterials.forEach(m => {
+      totalStock += m.stockQuantity || 0;
+      totalReorder += m.reorderLevel || 0;
+      if (m.status === 'Low Stock' || m.status === 'Out of Stock' || m.stockQuantity <= m.reorderLevel) {
+        hasLowStockAlert = true;
+      }
     });
-    
-    // Group sales records
-    sales.forEach(s => {
-      const m = new Date(s.createdAt).toLocaleString('default', { month: 'short' });
-      salesByMonth[m] = (salesByMonth[m] || 0) + (s.amount || 0);
-    });
+    const capacityVal = totalReorder > 0 ? Math.round((totalStock / (totalReorder * 2)) * 100) : 100;
+    const rawMaterialPercentage = Math.min(Math.max(capacityVal, 0), 100);
+    const rawMaterialStatus = hasLowStockAlert ? 'LOW ALERT' : 'NORMAL';
 
-    // Baseline fallback values to ensure beautiful charts initially
-    const baselineSales = {
-      'Jan': 180000,
-      'Feb': 240000,
-      'Mar': 310000,
-      'Apr': 280000,
-      'May': 450000,
-      'Jun': 520000
+    // 1. Monthly Production Chart Data (Vite / AreaChart)
+    const getLast6Months = () => {
+      const months = [];
+      const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      const date = new Date();
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(date.getFullYear(), date.getMonth() - i, 1);
+        months.push(monthNames[d.getMonth()]);
+      }
+      return months;
     };
+    const chartMonths = getLast6Months();
 
-    const monthlySalesChart = months.slice(0, 6).map(m => ({
+    const productionBatches = await ProductionBatch.find();
+    const productionByMonth = {};
+    chartMonths.forEach(m => {
+      productionByMonth[m] = 0;
+    });
+    productionBatches.forEach(pb => {
+      const dateVal = pb.productionDate || pb.createdAt;
+      const m = new Date(dateVal).toLocaleString('default', { month: 'short' }).toUpperCase();
+      if (productionByMonth[m] !== undefined) {
+        productionByMonth[m] += pb.quantityProduced || 0;
+      }
+    });
+    const monthlyProductionChart = chartMonths.map(m => ({
       name: m,
-      sales: (salesByMonth[m] || 0) + (baselineSales[m] || 0)
+      value: productionByMonth[m]
     }));
 
-    // 2. Order Status Distribution Chart Data
+    const currentMonthName = new Date().toLocaleString('default', { month: 'short' }).toUpperCase();
+    const bricksProducedThisMonth = productionByMonth[currentMonthName] || 0;
+
+    // 2. Monthly Finance Chart Data (Revenue vs Expenses BarChart)
+    const finances = await Finance.find();
+    const financeByMonth = {};
+    chartMonths.forEach(m => {
+      financeByMonth[m] = { revenue: 0, expenses: 0 };
+    });
+    finances.forEach(f => {
+      const dateVal = f.date ? new Date(f.date) : f.createdAt;
+      const m = new Date(dateVal).toLocaleString('default', { month: 'short' }).toUpperCase();
+      if (financeByMonth[m] !== undefined) {
+        if (f.type === 'Income') {
+          financeByMonth[m].revenue += f.amount || 0;
+        } else if (f.type === 'Expense') {
+          financeByMonth[m].expenses += f.amount || 0;
+        }
+      }
+    });
+    const monthlyFinanceChart = chartMonths.map(m => ({
+      name: m,
+      revenue: financeByMonth[m].revenue,
+      expenses: financeByMonth[m].expenses
+    }));
+
+    // 3. Order Status Distribution Chart Data
     const allQuotesForStatus = await OrderQuote.find();
     const statusMap = {};
     allQuotesForStatus.forEach(q => {
       statusMap[q.status] = (statusMap[q.status] || 0) + 1;
     });
-
-    // Ensure we represent key statuses
     const keyStatuses = ['Order Placed', 'Order Confirmed', 'Production Started', 'Ready for Delivery', 'Delivered'];
     const orderStatusDistribution = keyStatuses.map(status => ({
       name: status,
-      value: statusMap[status] || (status === 'Order Placed' ? 1 : 0) // default fallback 1 for visual preview
+      value: statusMap[status] || 0
     }));
 
-    // 3. Product Demand Analysis Chart Data
+    // 4. Product Demand Analysis Chart Data
     const productMap = {};
     allQuotesForStatus.forEach(q => {
       const qtyStr = String(q.quantity).replace(/[^0-9]/g, '');
-      const qtyVal = parseInt(qtyStr) || 5000;
+      const qtyVal = parseInt(qtyStr) || 0;
       productMap[q.product] = (productMap[q.product] || 0) + qtyVal;
     });
-
-    // Ensure we populate from products catalog if empty
-    if (Object.keys(productMap).length === 0) {
-      productMap['Standard Clay Brick'] = 45000;
-      productMap['Fly Ash Brick'] = 35000;
-      productMap['Refractory Fire Brick'] = 15000;
-    }
-
     const productDemandAnalysis = Object.keys(productMap).map(prod => ({
       name: prod,
       value: productMap[prod]
     }));
 
-    // 4. Inventory Usage Trends Chart Data
+    // 5. Inventory Usage Trends Chart Data
+    const inventoryItems = await Inventory.find();
     let inventoryUsageTrends = inventoryItems.map(item => ({
       name: item.product,
       available: item.availableStock || 0,
       reserved: item.reservedStock || 0
     }));
-
-    if (inventoryUsageTrends.length === 0) {
-      inventoryUsageTrends = [
-        { name: 'Standard Clay Brick', available: 105000, reserved: 15000 },
-        { name: 'Fly Ash Brick', available: 60000, reserved: 20000 },
-        { name: 'Refractory Fire Brick', available: 15000, reserved: 0 }
-      ];
-    }
 
     res.json({
       totalWorkers,
@@ -121,9 +155,15 @@ export const getDashboardStats = async (req, res) => {
       ordersInProduction,
       readyForDelivery,
       deliveredOrders,
-      revenue,
+      totalIncome,
+      totalExpenses,
+      netBalance,
       inventoryStockLevels,
-      monthlySalesChart,
+      bricksProducedThisMonth,
+      rawMaterialPercentage,
+      rawMaterialStatus,
+      monthlyProductionChart,
+      monthlyFinanceChart,
       orderStatusDistribution,
       productDemandAnalysis,
       inventoryUsageTrends

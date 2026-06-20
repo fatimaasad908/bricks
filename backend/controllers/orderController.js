@@ -6,16 +6,26 @@ import Driver from '../models/Driver.js';
 
 export const createOrderQuote = async (req, res) => {
   try {
-    const { companyName, contactPerson, email, phone, product, quantity, location, description, userId } = req.body;
+    const { companyName, contactPerson, email, phone, product, quantity, location, description, userId, status, orderDate } = req.body;
     
     const orderQuote = new OrderQuote({
-      companyName, contactPerson, email, phone, product, quantity, location, description, isRead: false,
+      companyName: companyName || 'Manual Order',
+      contactPerson,
+      email,
+      phone: phone || 'N/A',
+      product,
+      quantity,
+      location,
+      description,
+      isRead: false,
       userId: userId || null,
-      statusHistory: [{ status: 'Order Placed', note: 'Order requested by customer' }]
+      status: status || 'Order Placed',
+      orderDate: orderDate || new Date(),
+      statusHistory: [{ status: status || 'Order Placed', note: 'Order created' }]
     });
 
     await orderQuote.save();
-    res.status(201).json({ message: 'Quote requested successfully' });
+    res.status(201).json({ message: 'Order created successfully', order: orderQuote });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -109,6 +119,23 @@ export const updateOrderStatus = async (req, res) => {
 
     order.status = finalStatus;
     if (totalPrice !== undefined) order.totalPrice = totalPrice;
+
+    // Sync SalesOrder fields if it is a Direct Sales Order
+    if (order.orderNumber) {
+      if (finalStatus === 'Delivered') {
+        order.deliveryStatus = 'Delivered';
+      } else if (['Out for Delivery', 'In Transit', 'Driver Assigned', 'Ready for Delivery'].includes(finalStatus)) {
+        order.deliveryStatus = 'Shipped';
+      } else if (finalStatus === 'Rejected') {
+        order.deliveryStatus = 'Cancelled';
+      } else {
+        order.deliveryStatus = 'Pending';
+      }
+      if (totalPrice !== undefined) {
+        order.totalAmount = totalPrice;
+      }
+    }
+
     if (statusNotes !== undefined) order.statusNotes = statusNotes;
     if (estimatedDeliveryDate !== undefined) order.estimatedDeliveryDate = estimatedDeliveryDate || null;
     if (assignedVehicle !== undefined) order.assignedVehicle = assignedVehicle;

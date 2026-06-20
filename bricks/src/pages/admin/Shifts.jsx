@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, Download, CheckCircle2, Clock, Trash2, X, Edit, Calendar } from 'lucide-react';
+import { UserPlus, CheckCircle2, Clock, Trash2, X, Edit, Calendar } from 'lucide-react';
 import { apiFetch } from '../../utils/api';
 
 export default function AdminShifts() {
@@ -96,9 +96,6 @@ export default function AdminShifts() {
           <p className="text-gray-500 text-sm">Schedule daily plant labor shifts, supervisor controls, timing allocations, and workforce headcount volume</p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 bg-white border border-gray-200 text-brown-900 px-4 py-2 rounded-lg text-sm font-semibold hover:border-terracotta-500 transition-colors shadow-sm">
-            <Download className="w-4 h-4" /> Export List
-          </button>
           <button onClick={() => { setEditingId(null); setFormData({ shiftName: 'Morning Shift', supervisor: '', employeesCount: '', startTime: '08:00', endTime: '16:00', status: 'Active' }); setShowModal(true); }} className="flex items-center gap-2 bg-terracotta-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-terracotta-700 transition-colors shadow-sm shadow-terracotta-600/20">
             <Calendar className="w-4 h-4" /> Schedule Shift
           </button>
@@ -146,13 +143,6 @@ export default function AdminShifts() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
           <h3 className="text-sm font-bold text-gray-400 tracking-wider uppercase">Shift Roster</h3>
-          <input 
-            type="text" 
-            placeholder="Search shifts..." 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-terracotta-500 w-64 text-brown-900" 
-          />
         </div>
         <div className="overflow-x-auto">
           {loading ? (

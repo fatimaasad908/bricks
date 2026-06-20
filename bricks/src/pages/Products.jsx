@@ -106,13 +106,13 @@ export default function Products() {
                   <div className="w-full md:w-1/2 relative min-h-[300px] md:min-h-full overflow-hidden group bg-gray-100">
                     <img
                       src={
-                        item.image === "first" || item.image?.includes("first") || item.name?.toLowerCase().includes("red")
-                          ? "/assets/first.png"
-                          : item.image === "second" || item.image?.includes("second") || item.name?.toLowerCase().includes("fire")
-                          ? "/assets/second.png"
-                          : item.image === "third" || item.image?.includes("third") || item.name?.toLowerCase().includes("clay")
-                          ? "/assets/third.png"
-                          : item.image?.startsWith('/uploads')
+                        item.image === "first" || item.image?.includes("first") || item.name?.toLowerCase().includes("red") || item.name?.toLowerCase().includes("awaal")
+                          ? "/src/assets/first.png"
+                          : item.image === "second" || item.image?.includes("second") || item.name?.toLowerCase().includes("fire") || item.name?.toLowerCase().includes("doem")
+                          ? "/src/assets/second.png"
+                          : item.image === "third" || item.image?.includes("third") || item.name?.toLowerCase().includes("clay") || item.name?.toLowerCase().includes("soem")
+                          ? "/src/assets/third.png"
+                          : item.image?.startsWith('/src/assets')
                           ? `http://localhost:5000${item.image}`
                           : item.image
                       }

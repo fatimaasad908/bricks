@@ -103,8 +103,34 @@ const orderQuoteSchema = new mongoose.Schema({
   isRead: {
     type: Boolean,
     default: false
+  },
+  orderNumber: {
+    type: String,
+    sparse: true,
+    unique: true
+  },
+  customer: {
+    type: String
+  },
+  products: [{
+    productName: String,
+    quantity: Number,
+    unitPrice: Number
+  }],
+  paymentStatus: {
+    type: String,
+    enum: ['Paid', 'Unpaid', 'Partial'],
+    default: 'Unpaid'
+  },
+  deliveryStatus: {
+    type: String,
+    enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
+    default: 'Pending'
+  },
+  orderDate: {
+    type: Date,
+    default: Date.now
   }
-
 }, { timestamps: true });
 
 const OrderQuote = mongoose.model('OrderQuote', orderQuoteSchema);

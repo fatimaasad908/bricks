@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { UserPlus, Download, CheckCircle2, Clock, Trash2, X, Edit, Zap } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { apiFetch } from '../../utils/api';
+import ExportButton from '../../components/ExportButton';
 
 export default function AdminEnergyConsumption() {
   const [items, setItems] = useState([]);
@@ -100,9 +101,14 @@ export default function AdminEnergyConsumption() {
           <p className="text-gray-500 text-sm">Track electricity, gas, coal, diesel costs, and efficiency ratios for kilns</p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 bg-white border border-gray-200 text-brown-900 px-4 py-2 rounded-lg text-sm font-semibold hover:border-terracotta-500 transition-colors shadow-sm">
-            <Download className="w-4 h-4" /> Export List
-          </button>
+          <ExportButton 
+            filteredData={filteredItems}
+            allData={items}
+            headers={['Month', 'Energy Type', 'Quantity Consumed', 'Cost (PKR)', 'Efficiency Ratio']}
+            keys={['month', 'energyType', 'quantityConsumed', 'cost', 'efficiencyRatio']}
+            title="Energy Consumption Export"
+            filename="energy_consumption_export"
+          />
           <button onClick={() => { setEditingId(null); setFormData({ month: '2026-05', energyType: 'Electricity', quantityConsumed: '', cost: '' }); setShowModal(true); }} className="flex items-center gap-2 bg-terracotta-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-terracotta-700 transition-colors shadow-sm shadow-terracotta-600/20">
             <Zap className="w-4 h-4" /> Log Energy usage
           </button>
@@ -190,13 +196,6 @@ export default function AdminEnergyConsumption() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
           <h3 className="text-sm font-bold text-gray-400 tracking-wider uppercase">Energy Ledger</h3>
-          <input 
-            type="text" 
-            placeholder="Search fuel/month..." 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-terracotta-500 w-64 text-brown-900" 
-          />
         </div>
         <div className="overflow-x-auto">
           {loading ? (

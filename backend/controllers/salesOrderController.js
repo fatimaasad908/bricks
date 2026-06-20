@@ -1,5 +1,36 @@
-import SalesOrder from '../models/SalesOrder.js';
+import OrderQuote from '../models/OrderQuote.js';
 import Inventory from '../models/Inventory.js';
+
+// Mapping helper for Sales Order to OrderQuote fields
+const mapSalesOrderToOrderQuote = (data) => {
+  const quantityNum = Number(data.quantity);
+  const totalAmt = Number(data.totalAmount);
+  
+  const mapped = {
+    orderNumber: data.orderNumber,
+    customer: data.customer,
+    products: data.products,
+    quantity: quantityNum,
+    totalAmount: totalAmt,
+    paymentStatus: data.paymentStatus,
+    deliveryStatus: data.deliveryStatus,
+    orderDate: data.orderDate || new Date(),
+    
+    // OrderQuote fields
+    companyName: 'Sales Order',
+    contactPerson: data.customer,
+    email: data.email || 'sales@bricks.com',
+    phone: data.phone || 'N/A',
+    product: (data.products && data.products[0]?.productName) || 'Standard Clay Brick',
+    quantity: String(quantityNum),
+    totalPrice: totalAmt,
+    status: data.deliveryStatus === 'Pending' ? 'Pending' : 
+            data.deliveryStatus === 'Shipped' ? 'Out for Delivery' : 
+            data.deliveryStatus === 'Delivered' ? 'Delivered' : 'Rejected',
+    isRead: true
+  };
+  return mapped;
+};
 
 // Auto-update inventory stocks when orders are booked
 const updateInventoryOnSalesOrder = async (order, isCompleted = false) => {
@@ -27,7 +58,7 @@ const updateInventoryOnSalesOrder = async (order, isCompleted = false) => {
 
 export const getSalesOrders = async (req, res) => {
   try {
-    const items = await SalesOrder.find().sort({ createdAt: -1 });
+    const items = await OrderQuote.find({ orderNumber: { $exists: true, $ne: null } }).sort({ createdAt: -1 });
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -36,11 +67,13 @@ export const getSalesOrders = async (req, res) => {
 
 export const createSalesOrder = async (req, res) => {
   try {
-    const existing = await SalesOrder.findOne({ orderNumber: req.body.orderNumber });
+    const existing = await OrderQuote.findOne({ orderNumber: req.body.orderNumber });
     if (existing) {
       return res.status(400).json({ message: 'Order number already exists' });
     }
-    const item = new SalesOrder(req.body);
+    
+    const mappedData = mapSalesOrderToOrderQuote(req.body);
+    const item = new OrderQuote(mappedData);
     await item.save();
 
     // Trigger auto inventory updating hook
@@ -55,10 +88,12 @@ export const createSalesOrder = async (req, res) => {
 
 export const updateSalesOrder = async (req, res) => {
   try {
-    const originalOrder = await SalesOrder.findById(req.params.id);
+    const originalOrder = await OrderQuote.findById(req.params.id);
     if (!originalOrder) return res.status(404).json({ message: 'Sales order not found' });
 
-    const item = await SalesOrder.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const mappedData = mapSalesOrderToOrderQuote(req.body);
+
+    const item = await OrderQuote.findByIdAndUpdate(req.params.id, mappedData, { new: true, runValidators: true });
     
     // If status changed to Delivered: adjust total stock
     if (originalOrder.deliveryStatus !== 'Delivered' && item.deliveryStatus === 'Delivered') {
@@ -72,7 +107,7 @@ export const updateSalesOrder = async (req, res) => {
 
 export const deleteSalesOrder = async (req, res) => {
   try {
-    const item = await SalesOrder.findByIdAndDelete(req.params.id);
+    const item = await OrderQuote.findByIdAndDelete(req.params.id);
     if (!item) return res.status(404).json({ message: 'Sales order not found' });
     res.json({ message: 'Sales order deleted successfully' });
   } catch (error) {

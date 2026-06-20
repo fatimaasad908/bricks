@@ -96,9 +96,6 @@ export default function AdminProductionBatches() {
           <p className="text-gray-500 text-sm">Monitor daily kiln loading, operator shifts, firing progress, and output yield logs</p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 bg-white border border-gray-200 text-brown-900 px-4 py-2 rounded-lg text-sm font-semibold hover:border-terracotta-500 transition-colors shadow-sm">
-            <Download className="w-4 h-4" /> Export List
-          </button>
           <button onClick={() => { setEditingId(null); setFormData({ batchNumber: 'PB-' + Date.now().toString().slice(-4), productionDate: new Date().toISOString().split('T')[0], operator: '', quantityProduced: '', kilnStatus: 'Loading', completionStatus: 'In Progress' }); setShowModal(true); }} className="flex items-center gap-2 bg-terracotta-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-terracotta-700 transition-colors shadow-sm shadow-terracotta-600/20">
             <Layers className="w-4 h-4" /> Record New Batch
           </button>
@@ -146,13 +143,6 @@ export default function AdminProductionBatches() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
           <h3 className="text-sm font-bold text-gray-400 tracking-wider uppercase">Kiln yield tracking</h3>
-          <input 
-            type="text" 
-            placeholder="Search batches..." 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-terracotta-500 w-64 text-brown-900" 
-          />
         </div>
         <div className="overflow-x-auto">
           {loading ? (

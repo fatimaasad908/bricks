@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { UserPlus, Download, CheckCircle2, Clock, Trash2, X, Edit, Wrench } from 'lucide-react';
 import { apiFetch } from '../../utils/api';
+import ExportButton from '../../components/ExportButton';
 
 export default function AdminEquipment() {
   const [items, setItems] = useState([]);
@@ -96,9 +97,14 @@ export default function AdminEquipment() {
           <p className="text-gray-500 text-sm">Monitor operational status, schedules, plant positions, and downtime details of mixers and kilns</p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 bg-white border border-gray-200 text-brown-900 px-4 py-2 rounded-lg text-sm font-semibold hover:border-terracotta-500 transition-colors shadow-sm">
-            <Download className="w-4 h-4" /> Export List
-          </button>
+          <ExportButton 
+            filteredData={filteredItems}
+            allData={items}
+            headers={['Equipment Name', 'Type', 'Location', 'Operational Status', 'Purchase Date', 'Maintenance Schedule']}
+            keys={['equipmentName', 'type', 'location', 'operationalStatus', 'purchaseDate', 'maintenanceSchedule']}
+            title="Machinery Equipment Export"
+            filename="machinery_equipment_export"
+          />
           <button onClick={() => { setEditingId(null); setFormData({ equipmentName: '', type: 'Clay Mixer', location: 'Zone A', operationalStatus: 'Operational', purchaseDate: new Date().toISOString().split('T')[0], maintenanceSchedule: 'Monthly' }); setShowModal(true); }} className="flex items-center gap-2 bg-terracotta-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-terracotta-700 transition-colors shadow-sm shadow-terracotta-600/20">
             <Wrench className="w-4 h-4" /> Register Machinery
           </button>
@@ -144,13 +150,6 @@ export default function AdminEquipment() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
           <h3 className="text-sm font-bold text-gray-400 tracking-wider uppercase">Asset Inventory</h3>
-          <input 
-            type="text" 
-            placeholder="Search equipment..." 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-terracotta-500 w-64 text-brown-900" 
-          />
         </div>
         <div className="overflow-x-auto">
           {loading ? (

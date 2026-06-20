@@ -23,11 +23,16 @@ export default function AdminLogin() {
     setError('');
     setLoading(true);
 
-    const result = await login(email, password, true);
+    const isAdminEmail = email === 'asadfatima93@gmail.com';
+    const result = await login(email, password, isAdminEmail);
     
     setLoading(false);
     if (result.success) {
-      navigate('/admin/dashboard');
+      if (isAdminEmail) {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/profile');
+      }
     } else {
       setError(result.message);
     }
@@ -117,18 +122,7 @@ export default function AdminLogin() {
             </div>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-            <Link to="/login" className="text-xs font-semibold text-terracotta-600 hover:text-terracotta-700">
-              Return to Customer Login
-            </Link>
-          </div>
-
-          <div className="mt-6 bg-gray-50 p-4 rounded-xl border border-gray-100 text-center">
-            <span className="block text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-1">Admin Credentials</span>
-            <code className="text-xs font-mono text-brown-700 bg-gray-100 px-2 py-0.5 rounded">asadfatima93@gmail.com</code>
-            <span className="mx-2 text-gray-300">/</span>
-            <code className="text-xs font-mono text-brown-700 bg-gray-100 px-2 py-0.5 rounded">admin123</code>
-          </div>
+          {/* Removed Return to Customer Login and Admin Credentials */}
 
         </div>
       </div>

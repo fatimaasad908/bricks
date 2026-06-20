@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Edit, Trash2, X, Eye, CheckCircle, Clock, Mail, Phone, MapPin, User, Package, Calendar, Truck, FileText } from 'lucide-react';
+import { ShoppingCart, Edit, Trash2, X, Eye, CheckCircle, Clock, Mail, Phone, MapPin, User, Package, Calendar, Truck, FileText, Plus } from 'lucide-react';
 import { apiFetch } from '../../utils/api';
 import ExportButton from '../../components/ExportButton';
 import { motion } from 'framer-motion';
@@ -8,10 +8,20 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [availableTrucks, setAvailableTrucks] = useState([]);
   const [availableDrivers, setAvailableDrivers] = useState([]);
+  const [newOrderForm, setNewOrderForm] = useState({
+    contactPerson: '',
+    email: '',
+    product: 'Standard Clay Brick',
+    quantity: '',
+    orderDate: new Date().toISOString().split('T')[0],
+    location: '',
+    status: 'Order Placed'
+  });
   const [statusUpdate, setStatusUpdate] = useState({
     status: 'Pending',
     totalPrice: 0,
@@ -49,6 +59,39 @@ export default function AdminOrders() {
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  const handleCreateOrder = async (e) => {
+    e.preventDefault();
+    try {
+      await apiFetch('/orders', {
+        method: 'POST',
+        body: JSON.stringify({
+          companyName: 'Manual Order',
+          contactPerson: newOrderForm.contactPerson,
+          email: newOrderForm.email,
+          phone: 'N/A',
+          product: newOrderForm.product,
+          quantity: newOrderForm.quantity,
+          location: newOrderForm.location,
+          status: newOrderForm.status,
+          orderDate: newOrderForm.orderDate
+        })
+      });
+      setShowAddModal(false);
+      setNewOrderForm({
+        contactPerson: '',
+        email: '',
+        product: 'Standard Clay Brick',
+        quantity: '',
+        orderDate: new Date().toISOString().split('T')[0],
+        location: '',
+        status: 'Order Placed'
+      });
+      fetchOrders();
+    } catch (error) {
+      alert(error.message);
+    }
+  };
 
   const handleUpdateOrder = async (e) => {
     e.preventDefault();
@@ -132,13 +175,6 @@ export default function AdminOrders() {
            <p className="text-gray-500 text-sm">Review incoming requests and manage order lifecycle.</p>
         </div>
         <div className="flex gap-3 items-center">
-          <input 
-            type="text" 
-            placeholder="Search orders..." 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-terracotta-500 w-64 text-brown-900 bg-white" 
-          />
           <ExportButton 
             filteredData={filteredOrders}
             allData={orders}
@@ -147,6 +183,12 @@ export default function AdminOrders() {
             title="Customer Orders Export"
             filename="customer_orders"
           />
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 bg-terracotta-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-terracotta-700 transition-colors shadow-sm shadow-terracotta-600/20 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" /> New Order
+          </button>
         </div>
       </div>
 
@@ -456,6 +498,134 @@ export default function AdminOrders() {
               </div>
 
             </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Add New Order Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg p-8 relative"
+          >
+            <button 
+              onClick={() => setShowAddModal(false)} 
+              className="absolute top-6 right-6 p-2 text-gray-300 hover:text-gray-600 transition-colors cursor-pointer"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <h3 className="text-xl font-bold text-brown-900 mb-6">Create New Order</h3>
+            <form onSubmit={handleCreateOrder} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Customer Name</label>
+                <input 
+                  type="text" 
+                  required 
+                  value={newOrderForm.contactPerson} 
+                  onChange={e => setNewOrderForm({...newOrderForm, contactPerson: e.target.value})} 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-terracotta-500/20 focus:bg-white outline-none transition-all font-medium text-brown-900" 
+                  placeholder="e.g. John Doe" 
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Customer Email</label>
+                <input 
+                  type="email" 
+                  required 
+                  value={newOrderForm.email} 
+                  onChange={e => setNewOrderForm({...newOrderForm, email: e.target.value})} 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-terracotta-500/20 focus:bg-white outline-none transition-all font-medium text-brown-900" 
+                  placeholder="e.g. john@example.com" 
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Product Name</label>
+                  <select 
+                    value={newOrderForm.product} 
+                    onChange={e => setNewOrderForm({...newOrderForm, product: e.target.value})} 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-terracotta-500/20 focus:bg-white outline-none transition-all font-medium text-brown-900"
+                  >
+                    <option>Standard Clay Brick</option>
+                    <option>Fly Ash Brick</option>
+                    <option>Refractory Fire Brick</option>
+                    <option>Concrete Hollow Block</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Quantity</label>
+                  <input 
+                    type="number" 
+                    required 
+                    value={newOrderForm.quantity} 
+                    onChange={e => setNewOrderForm({...newOrderForm, quantity: e.target.value})} 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-terracotta-500/20 focus:bg-white outline-none transition-all font-medium text-brown-900" 
+                    placeholder="e.g. 5000" 
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Order Date</label>
+                  <input 
+                    type="date" 
+                    required 
+                    value={newOrderForm.orderDate} 
+                    onChange={e => setNewOrderForm({...newOrderForm, orderDate: e.target.value})} 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-terracotta-500/20 focus:bg-white outline-none transition-all font-medium text-brown-900" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Status</label>
+                  <select 
+                    value={newOrderForm.status} 
+                    onChange={e => setNewOrderForm({...newOrderForm, status: e.target.value})} 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-terracotta-500/20 focus:bg-white outline-none transition-all font-bold text-brown-900"
+                  >
+                    {[
+                      'Order Placed',
+                      'Order Confirmed',
+                      'Raw Material Allocated',
+                      'Production Started',
+                      'Bricks Under Manufacturing',
+                      'Quality Check Completed',
+                      'Ready for Delivery',
+                      'Out for Delivery',
+                      'Delivered',
+                      'Pending',
+                      'Reviewed',
+                      'Quoted',
+                      'Processing',
+                      'Rejected',
+                      'Driver Assigned',
+                      'In Transit',
+                      'Reached Site',
+                      'Pending Assignment'
+                    ].map(st => (
+                      <option key={st} value={st}>{st}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Delivery Address</label>
+                <input 
+                  type="text" 
+                  required 
+                  value={newOrderForm.location} 
+                  onChange={e => setNewOrderForm({...newOrderForm, location: e.target.value})} 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-terracotta-500/20 focus:bg-white outline-none transition-all font-medium text-brown-900" 
+                  placeholder="e.g. 123 Main St, New York" 
+                />
+              </div>
+              <div className="pt-4">
+                <button type="submit" className="w-full bg-brown-900 text-white font-bold py-4 rounded-xl hover:bg-black transition-all shadow-xl flex items-center justify-center gap-3 cursor-pointer">
+                  Create Order
+                </button>
+              </div>
+            </form>
           </motion.div>
         </div>
       )}
