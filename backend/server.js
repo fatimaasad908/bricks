@@ -41,7 +41,10 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['https://brick-lime.vercel.app', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+  credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));

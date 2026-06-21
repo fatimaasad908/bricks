@@ -113,7 +113,7 @@ export default function Products() {
                           : item.image === "third" || item.image?.includes("third") || item.name?.toLowerCase().includes("clay") || item.name?.toLowerCase().includes("soem")
                           ? "/src/assets/third.png"
                           : item.image?.startsWith('/src/assets')
-                          ? `http://localhost:5000${item.image}`
+                          ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${item.image}`
                           : item.image
                       }
                       alt={item.name}

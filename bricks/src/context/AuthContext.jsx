@@ -27,9 +27,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password, isAdmin = false) => {
     try {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const endpoint = isAdmin 
-        ? 'http://localhost:5000/api/auth/admin-login' 
-        : 'http://localhost:5000/api/auth/login';
+        ? `${baseUrl}/api/auth/admin-login` 
+        : `${baseUrl}/api/auth/login`;
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

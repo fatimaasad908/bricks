@@ -16,7 +16,7 @@ const getProductImage = (imagePath, productName = '') => {
     return "/images/clay_brick.png";
   }
   if (imagePath.startsWith('/uploads')) {
-    return `http://localhost:5000${imagePath}`;
+    return `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${imagePath}`;
   }
   return imagePath;
 };
